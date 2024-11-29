@@ -588,14 +588,31 @@ require('lazy').setup({
         end,
       })
 
-      -- Change diagnostic symbols in the sign column (gutter)
-      -- if vim.g.have_nerd_font then
-      --   local signs = { Error = '', Warn = '', Hint = '', Info = '' }
-      --   for type, icon in pairs(signs) do
-      --     local hl = 'DiagnosticSign' .. type
-      --     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-      --   end
-      -- end
+      -- Configure global diagnostic settings
+      vim.diagnostic.config {
+        -- Customize how diagnostics appear:
+        virtual_text = {
+          severity = {
+            -- Only show virtual text for diagnostics with severity higher than WARN
+            -- This effectively ignores line length warnings which are usually HINT or WARN
+            min = vim.diagnostic.severity.ERROR,
+          },
+        },
+        -- You can also filter specific diagnostics:
+        diagnostics = {
+          -- This will disable diagnostic signs in the sign column
+          signs = true,
+          -- Customize which diagnostics show up:
+          severity_sort = true,
+          underline = true,
+          update_in_insert = false,
+          -- Optional: Add a custom filter function to ignore specific diagnostics
+          custom_filter = function(diagnostic)
+            -- Ignore diagnostics related to line length
+            return not (diagnostic.message:match 'line too long' or diagnostic.message:match 'line length' or diagnostic.code == 'E501')
+          end,
+        },
+      }
 
       -- LSP servers and clients are able to communicate to each other what features they support.
       --  By default, Neovim doesn't support everything that is in the LSP specification.
@@ -603,6 +620,22 @@ require('lazy').setup({
       --  So, we create new capabilities with nvim cmp, and then broadcast that to the servers.
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+      -- Modify the capabilities to ignore certain diagnostics
+      capabilities = vim.tbl_deep_extend('force', capabilities, {
+        textDocument = {
+          publishDiagnostics = {
+            -- Optionally disable all style-related diagnostics
+            tagSupport = {
+              valueSet = {
+                1, -- Error
+                2, -- Warning
+                -- 3, -- Information
+                -- 4, -- Hint
+              },
+            },
+          },
+        },
+      })
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
