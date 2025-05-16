@@ -110,6 +110,14 @@ vim.opt.mouse = 'a'
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
+-- Always use spaces instead of tabs
+vim.opt.expandtab = true
+
+-- Set tab width to 4 spaces
+vim.opt.tabstop = 4 -- Width of tab character
+vim.opt.shiftwidth = 4 -- Width of indent
+vim.opt.softtabstop = 4 -- How many columns cursor moves right when you press tab
+
 -- Sync clipboard between OS and Neovim.
 --  Schedule the setting after `UiEnter` because it can increase startup-time.
 --  Remove this option if you want your OS clipboard to remain independent.
