@@ -3,10 +3,14 @@ using namespace std;
 
 int main()
 {
-    long long n; cin >> n;
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
 
-    for(int i = 0; i < n; i++){
+    long long testcases; cin >> testcases;
 
+    for(int testcase = 0; testcase < testcases; testcase++){
+        // TODO:
     }
 
     return 0;
