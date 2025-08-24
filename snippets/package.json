@@ -1,0 +1,58 @@
+{
+  "name": "competitive-programming-snippets",
+  "contributes": {
+    "snippets": [
+      {
+        "language": "cpp",
+        "path": "./boilerplate.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./hash.json"
+      },
+
+
+
+      {
+        "language": "cpp",
+        "path": "./ds_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./string_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./dp_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./geometry_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./graph_traversal_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./shortest_path_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./mst_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./maxflow_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./math_cp4.json"
+      },
+      {
+        "language": "cpp",
+        "path": "./gaussian_elimination_cp4.json"
+      }
+    ]
+  }
+}

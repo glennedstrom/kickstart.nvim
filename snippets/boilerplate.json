@@ -1,0 +1,41 @@
+{
+  "Codeforces C++ Template": {
+    "prefix": "boilcodeforces",
+    "body": [
+      "#include <bits/stdc++.h>",
+      "using namespace std;",
+      "",
+      "int main()",
+      "{",
+      "    return 0;",
+      "}"
+    ],
+    "description": "Codeforces C++ Template",
+    "scope": "cpp"
+  },
+  "Neetcode.io C++ Template": {
+    "prefix": "boilneetcode",
+    "body": [
+      "#include <bits/stdc++.h>",
+      "//#include <bits/extc++.h>",
+      "using namespace std;",
+      "",
+      "class Solution {",
+      "public:",
+      "    ${1:int} ${2:function_name}(${3:int n}) {",
+      "        ${4:// TODO: implement}",
+      "    }",
+      "};",
+      "int main()",
+      "{",
+      "    Solution s;",
+      "    ${1} ans = s.${2}();",
+      "    cout << \"Answer: \" << ans << endl;",
+      "    return 0;",
+      "}"
+    ],
+    "description": "NeetCode.io C++ Template",
+    "scope": "cpp"
+  }
+}
+
