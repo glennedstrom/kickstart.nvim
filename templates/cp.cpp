@@ -7,4 +7,4 @@ void solve() {
     // TODO:
 }
 
-int main(){ int testcase; cin >> testcase; while(testcase--){ solve(); } }//{solve();}
+int main(){int t;cin>>t;while(t--){solve();ios_base::sync_with_stdio(false);cin.tie(NULL);}}//{solve();ios_base::sync_with_stdio(false);cin.tie(NULL);}
