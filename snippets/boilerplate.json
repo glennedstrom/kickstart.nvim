@@ -1,16 +1,78 @@
 {
-  "Codeforces C++ Template": {
-    "prefix": "boilcodeforces",
+  "1-Indexed Vector C++ Template With TestCases": {
+    "prefix": "boiltvec1", 
     "body": [
       "#include <bits/stdc++.h>",
       "using namespace std;",
       "",
-      "int main()",
-      "{",
-      "    return 0;",
-      "}"
+      "void solve() {",
+      "    int n; cin >> n;",
+      "    vector<int> nums(n+1);",
+      "    for(int i = 1; i <= n; ++i){cin >> nums[i];}",
+      "",
+      "    // TODO: ",
+      "}",
+      "",
+      "int main(){int t;cin>>t;while(t--){solve();ios_base::sync_with_stdio(false);cin.tie(NULL);}}"
     ],
-    "description": "Codeforces C++ Template",
+    "description": "1-Indexed Vector Template With TestCases",
+    "scope": "cpp"
+  },
+  "Vector C++ Template With TestCases": {
+    "prefix": "boiltvec1", 
+    "body": [
+      "#include <bits/stdc++.h>",
+      "using namespace std;",
+      "",
+      "void solve() {",
+      "    int n; cin >> n;",
+      "    vector<int> nums(n);",
+      "    for(int i = 0; i < n; ++i){cin >> nums[i];}",
+      "",
+      "    // TODO: ",
+      "}",
+      "",
+      "int main(){int t;cin>>t;while(t--){solve();ios_base::sync_with_stdio(false);cin.tie(NULL);}}"
+    ],
+    "description": "Vector Template With TestCases",
+    "scope": "cpp"
+  },
+  "1-Indexed Vector C++ Template": {
+    "prefix": "boilvec1", 
+    "body": [
+      "#include <bits/stdc++.h>",
+      "using namespace std;",
+      "",
+      "void solve() {",
+      "    int n; cin >> n;",
+      "    vector<int> nums(n+1);",
+      "    for(int i = 1; i <= n; ++i){cin >> nums[i];}",
+      "",
+      "    // TODO: ",
+      "}",
+      "",
+      "int main(){solve();ios_base::sync_with_stdio(false);cin.tie(NULL);}"
+    ],
+    "description": "1-Indexed Vector Template",
+    "scope": "cpp"
+  },
+  "Vector C++ Template": {
+    "prefix": "boilvec", 
+    "body": [
+      "#include <bits/stdc++.h>",
+      "using namespace std;",
+      "",
+      "void solve() {",
+      "    int n; cin >> n;",
+      "    vector<int> nums(n);",
+      "    for(int i = 0; i < n; ++i){cin >> nums[i];}",
+      "",
+      "    // TODO: ",
+      "}",
+      "",
+      "int main(){solve();ios_base::sync_with_stdio(false);cin.tie(NULL);}"
+    ],
+    "description": "Vector Template",
     "scope": "cpp"
   },
   "Neetcode.io C++ Template": {
@@ -38,4 +100,3 @@
     "scope": "cpp"
   }
 }
-
