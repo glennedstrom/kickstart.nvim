@@ -1,7 +1,14 @@
 import sys
-
 def input():
-    return sys.stdin.readline()
+    return sys.stdin.readline().strip()
+import collections
+import queue
 
-#arr = list(map(int, input().split()))
+def solve():
+    pass
 
+
+if __name__ == "__main__":
+    tc = int(input())
+    for i in range(tc):
+        solve()
