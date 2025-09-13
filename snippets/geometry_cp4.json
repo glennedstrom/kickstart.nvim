@@ -1,6 +1,6 @@
 {
   "Point and Line Structures": {
-    "prefix": "pointline",
+    "prefix": "geompointline",
     "body": [
       "const double EPS = 1e-9;",
       "",
@@ -73,7 +73,7 @@
   },
 
   "Line Operations": {
-    "prefix": "lineops",
+    "prefix": "geomlineops",
     "body": [
       "void pointsToLine(point p1, point p2, line &l) {",
       "  if (fabs(p1.x-p2.x) < EPS)",
@@ -126,7 +126,7 @@
   },
 
   "CCW and Collinear Tests": {
-    "prefix": "ccwtest",
+    "prefix": "geomccwtest",
     "body": [
       "bool ccw(point p, point q, point r) {",
       "  return cross(toVec(p, q), toVec(p, r)) > -EPS;",
@@ -146,7 +146,7 @@
   },
 
   "Polygon Operations": {
-    "prefix": "polygon",
+    "prefix": "geompolygon",
     "body": [
       "double perimeter(const vector<point> &P) {",
       "  double ans = 0.0;",
@@ -195,7 +195,7 @@
   },
 
   "Convex Hull Graham": {
-    "prefix": "convexhull",
+    "prefix": "geomconvexhull",
     "body": [
       "vector<point> CH_Graham(vector<point> &Pts) {",
       "  vector<point> P(Pts);",
@@ -229,7 +229,7 @@
   },
 
   "Circle Operations": {
-    "prefix": "circle",
+    "prefix": "geomcircle",
     "body": [
       "int insideCircle(point_i p, point_i c, int r) {",
       "  int dx = p.x-c.x, dy = p.y-c.y;",
@@ -253,7 +253,7 @@
   },
 
   "Triangle Operations": {
-    "prefix": "triangle",
+    "prefix": "geomtriangle",
     "body": [
       "double perimeter(double ab, double bc, double ca) {",
       "  return ab + bc + ca;",
@@ -295,7 +295,7 @@
   },
 
   "Polygon Cutting": {
-    "prefix": "cutpolygon",
+    "prefix": "geomcutpolygon",
     "body": [
       "point lineIntersectSeg(point p, point q, point A, point B) {",
       "  double a = B.y-A.y, b = A.x-B.x, c = B.x*A.y - A.x*B.y;",

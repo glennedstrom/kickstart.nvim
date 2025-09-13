@@ -425,37 +425,5 @@
     ],
     "description": "Extended Euclidean algorithm for modular inverse",
     "scope": "cpp"
-  },
-
-  "String Algorithms Template": {
-    "prefix": "stringtemplate",
-    "body": [
-      "#include <bits/stdc++.h>",
-      "using namespace std;",
-      "",
-      "typedef long long ll;",
-      "typedef vector<int> vi;",
-      "typedef pair<int, int> ii;",
-      "",
-      "const int MAX_N = ${1:200010};",
-      "const int p = 131;",
-      "const int MOD = 1e9+7;",
-      "",
-      "// Add your string algorithms here",
-      "",
-      "int main() {",
-      "    ios_base::sync_with_stdio(false);",
-      "    cin.tie(NULL);",
-      "    ",
-      "    string T, P;",
-      "    cin >> T >> P;",
-      "    ",
-      "    ${2:// Your string processing code here}",
-      "    ",
-      "    return 0;",
-      "}"
-    ],
-    "description": "Template for string algorithm problems",
-    "scope": "cpp"
   }
 }

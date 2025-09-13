@@ -2,180 +2,279 @@ return {
   'xeluxee/competitest.nvim',
   dependencies = 'MunifTanjim/nui.nvim',
   config = function()
+    local template_file = {
+      cpp = '~/.config/nvim/templates/cp.cpp',
+      py = '~/.config/nvim/templates/cp.py',
+    }
+
+    local fold_patterns = {
+      cpp = { '^#include', '^#define', '^using' },
+      python = { '^import ', '^from ', '^#.*template', '^#.*Template' },
+    }
+
+    local last_ft_file = vim.fn.stdpath 'data' .. '/last_problem_ft'
+
+    -- Save last_ft to disk
+    local function save_last_ft(ft)
+      local f = io.open(last_ft_file, 'w')
+      if f then
+        f:write(ft)
+        f:close()
+      end
+    end
+
+    -- Load last_ft from disk
+    local function load_last_ft()
+      local f = io.open(last_ft_file, 'r')
+      if not f then
+        return 'cpp'
+      end
+      local ft = f:read '*l'
+      f:close()
+      return ft or 'cpp'
+    end
+
+    local last_ft = load_last_ft()
+
+    -- Helper: map vim filetype -> template_file key
+    local function ext_key_for_filetype(ft)
+      if ft == 'python' then
+        return 'py'
+      end
+      return ft
+    end
+
+    local function read_file(path)
+      local f = io.open(path, 'r')
+      if not f then
+        return nil
+      end
+      local content = f:read '*a'
+      f:close()
+      return content
+    end
+
+    local function is_fresh_template()
+      local ft = vim.bo.filetype
+      local ext_key = ext_key_for_filetype(ft)
+      local tpl = template_file[ext_key]
+      if not tpl then
+        return false
+      end
+
+      local tpl_path = vim.fn.expand(tpl)
+      local tpl_content = read_file(tpl_path)
+      if not tpl_content then
+        return false
+      end
+
+      tpl_content = tpl_content:gsub('\r\n', '\n')
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local cur = table.concat(lines, '\n'):gsub('\r\n', '\n')
+      if tpl_content:sub(-1) == '\n' and cur:sub(-1) ~= '\n' then
+        cur = cur .. '\n'
+      end
+
+      return cur == tpl_content
+    end
+
+    local function auto_fold_template(should_jump)
+      local ft = vim.bo.filetype
+      local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+      local last_line = 0
+
+      if ft == 'cpp' then
+        for i, line in ipairs(lines) do
+          if line:match '^#include' or line:match '^#define' or line:match '^using' then
+            last_line = i
+          end
+        end
+      elseif ft == 'python' then
+        for i, line in ipairs(lines) do
+          if line:match '^import%s' or line:match '^from%s+[%w_.]+%s+import' then
+            last_line = i
+          end
+        end
+      else
+        return
+      end
+
+      if last_line == 0 then
+        return
+      end
+
+      local old_fold = vim.opt_local.foldmethod:get()
+      vim.opt_local.foldmethod = 'manual'
+      vim.cmd('silent! 1,' .. last_line .. 'fold')
+      vim.opt_local.foldmethod = old_fold
+
+      if not should_jump then
+        return
+      end
+
+      local ext_key = ext_key_for_filetype(ft)
+      local tpl_path = template_file[ext_key] and vim.fn.expand(template_file[ext_key]) or ''
+      local cur_path = vim.fn.expand '%:p'
+      local fresh = tpl_path ~= '' and is_fresh_template()
+
+      if fresh and cur_path ~= tpl_path then
+        local target = math.min(last_line + 3, vim.api.nvim_buf_line_count(0))
+        vim.api.nvim_win_set_cursor(0, { target, 0 })
+        vim.api.nvim_feedkeys('^', 'n', true)
+      end
+    end
+
+    local function toggle_template_folds()
+      local ft = vim.bo.filetype
+      if not fold_patterns[ft] then
+        return
+      end
+
+      local fold_start = vim.fn.foldclosed(1)
+      if fold_start == -1 then
+        auto_fold_template(false)
+      else
+        vim.cmd '1foldopen'
+      end
+    end
+
     require('competitest').setup {
-      -- Basic configuration
       local_config_file_name = '.competitest.lua',
-      -- Language-specific settings
       compile_command = {
-        cpp = { exec = 'g++', args = { '-Wall', '-O2', '-std=gnu++23', '$(FNAME)', '-o', '$(FNOEXT)' } },
+        cpp = { exec = 'g++', args = { '-Wall', '-g', '-O2', '-std=gnu++17', '$(FNAME)', '-o', '$(FNOEXT)' } },
         c = { exec = 'gcc', args = { '-Wall', '-O2', '$(FNAME)', '-o', '$(FNOEXT)' } },
-        -- Python doesn't need compilation, so use a no-op command
-        python = { exec = 'true' },
       },
       run_command = {
         cpp = { exec = './$(FNOEXT)' },
         c = { exec = './$(FNOEXT)' },
-        -- Python execution with unbuffered output
         python = { exec = 'python3', args = { '-u', '$(FNAME)' } },
       },
-      -- Template settings
-      template_file = {
-        cpp = '~/.config/nvim/templates/cp.cpp',
-        python = '~/.config/nvim/templates/cp.py',
-      },
-      -- Test case settings
+
+      template_file = template_file,
       testcases_directory = './tests',
       testcases_use_single_file = true,
-      -- UI settings
       split_direction = 'horizontal',
       popup_width = 95,
       popup_height = 80,
-      -- Automatically save before running tests
       save_current_file = true,
-      -- Show test case details
       show_nu = true,
       show_rnu = true,
 
-      -- Fix for spaces in filenames: Use JAVA_TASK_CLASS modifier
-      -- This removes all non-alphabetic and non-numeric characters, including spaces
-      received_problems_path = '$(CWD)/$(JAVA_TASK_CLASS).$(FEXT)',
-      received_contests_problems_path = '$(JAVA_TASK_CLASS).$(FEXT)',
+      -- Use the saved last_ft as default
+      received_problems_path = function(task, file_extension)
+        local ext = last_ft or file_extension or 'cpp'
+        local name = task.name:gsub('%s+', '_'):gsub('[^%w_-]', '')
+        return string.format('%s/%s.%s', vim.fn.getcwd(), name, ext)
+      end,
 
-      -- Alternative: Use a custom function if you want more control
-      -- received_problems_path = function(task, file_extension)
-      --   local problem_name = task.name:gsub('%s+', '_') -- Replace spaces with underscores
-      --   problem_name = problem_name:gsub('[^%w_-]', '') -- Remove other special characters
-      --   return string.format('%s/%s.%s', vim.fn.getcwd(), problem_name, file_extension)
-      -- end,
+      received_contests_problems_path = function(task, file_extension)
+        local ext = last_ft or file_extension or 'cpp'
+        local name = task.name:gsub('%s+', '_'):gsub('[^%w_-]', '')
+        return string.format('%s.%s', name, ext)
+      end,
     }
-    -- Auto-fold template imports after loading
+
+    -- Auto-folding and file extension tracking
     local augroup = vim.api.nvim_create_augroup('CompetitestAutoFold', { clear = true })
 
-    -- Function to check if current buffer matches template
-    local function is_fresh_template()
-      local filetype = vim.bo.filetype
-      if filetype ~= 'cpp' then
-        return false
-      end
-
-      -- Get template file path
-      local template_path = vim.fn.expand '~/.config/nvim/templates/cp.cpp'
-
-      -- Read template file content
-      local template_file = io.open(template_path, 'r')
-      if not template_file then
-        return false
-      end
-
-      local template_content = template_file:read '*all'
-      template_file:close()
-
-      -- Get current buffer content
-      local current_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-      local current_content = table.concat(current_lines, '\n')
-
-      -- Add newline at end if template has it
-      if not current_content:match '\n$' and template_content:match '\n$' then
-        current_content = current_content .. '\n'
-      end
-
-      -- Compare contents
-      return current_content == template_content
-    end
-
-    -- Function to handle auto-folding
-    local function auto_fold_template(should_jump_and_edit)
-      local filetype = vim.bo.filetype
-
-      if filetype == 'cpp' then
-        -- Get all lines in the buffer
-        local all_lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
-        local last_template_line = 0
-
-        -- Find the last line that contains #include, #define, or using
-        for i, line in ipairs(all_lines) do
-          if line:match '^#include' or line:match '^#define' or line:match '^using' then
-            last_template_line = i
-          end
-        end
-
-        -- Only proceed if we found template lines
-        if last_template_line > 0 then
-          -- Enable manual folding temporarily
-          local old_foldmethod = vim.opt_local.foldmethod:get()
-          vim.opt_local.foldmethod = 'manual'
-
-          -- Create a fold from line 1 to the last template line
-          vim.cmd('1,' .. last_template_line .. 'fold')
-
-          -- Restore original fold method
-          vim.opt_local.foldmethod = old_foldmethod
-
-          -- Only jump and run cc if this is a fresh template
-          if should_jump_and_edit then
-            -- Move cursor 3 lines below the folded section
-            local target_line = last_template_line + 3
-            -- Make sure we don't go past the end of the file
-            local total_lines = vim.api.nvim_buf_line_count(0)
-            if target_line > total_lines then
-              target_line = total_lines
-            end
-
-            -- Set cursor position first
-            vim.api.nvim_win_set_cursor(0, { target_line, 0 })
-            -- Then use feedkeys to simulate pressing 'cc'
-            vim.api.nvim_feedkeys('cc', 'n', true)
-          end
-        end
-      end
-    end
-
-    -- Function to toggle template folds only
-    local function toggle_template_folds()
-      local filetype = vim.bo.filetype
-
-      if filetype == 'cpp' then
-        -- Check if line 1 is currently folded
-        local fold_start = vim.fn.foldclosed(1)
-        if fold_start == -1 then
-          -- Not folded, so create the fold (without jumping or running cc)
-          auto_fold_template(false)
-        else
-          -- Currently folded, so open the fold
-          vim.cmd '1foldopen'
-        end
-      end
-    end
-
-    -- Main autocmd for handling C++ files
     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       group = augroup,
-      pattern = { '*.cpp' },
+      pattern = { '*.cpp', '*.py', '*.c' },
       callback = function()
         vim.defer_fn(function()
-          -- Check if this is a fresh template
-          local is_template = is_fresh_template()
+          vim.b.is_fresh_template = is_fresh_template()
+          auto_fold_template(true)
 
-          -- Set buffer-local variable for future reference
-          vim.b.is_fresh_template = is_template
-
-          -- Always fold headers, but only jump+cc for fresh templates
-          auto_fold_template(is_template)
+          -- Update last_ft when entering a competitive programming file
+          local current_file = vim.fn.expand '%:p'
+          if current_file and current_file ~= '' then
+            local ext = current_file:match '%.([^%.]+)$'
+            if ext and (ext == 'cpp' or ext == 'py' or ext == 'c') then
+              local cwd = vim.fn.getcwd()
+              -- Only update if file is in current working directory (likely a competition file)
+              if current_file:sub(1, #cwd) == cwd then
+                last_ft = ext
+                save_last_ft(ext)
+              end
+            end
+          end
         end, 50)
       end,
     })
 
-    -- Manual keymap to toggle template folds
-    vim.keymap.set('n', '<leader>ct', function()
-      toggle_template_folds()
-    end, { desc = '[C]ompetitive [T]oggle template fold' })
+    -- Track when new competitive programming files are created
+    vim.api.nvim_create_autocmd({ 'BufNewFile' }, {
+      group = augroup,
+      pattern = { '*.cpp', '*.py', '*.c' },
+      callback = function()
+        local current_file = vim.fn.expand '%:p'
+        if current_file and current_file ~= '' then
+          local ext = current_file:match '%.([^%.]+)$'
+          if ext then
+            local cwd = vim.fn.getcwd()
+            if current_file:sub(1, #cwd) == cwd then
+              last_ft = ext
+              save_last_ft(ext)
+            end
+          end
+        end
+      end,
+    })
+
+    -- Track when competitive programming files are saved
+    vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
+      group = augroup,
+      pattern = { '*.cpp', '*.py', '*.c' },
+      callback = function()
+        local current_file = vim.fn.expand '%:p'
+        if current_file and current_file ~= '' then
+          local ext = current_file:match '%.([^%.]+)$'
+          if ext then
+            local cwd = vim.fn.getcwd()
+            if current_file:sub(1, #cwd) == cwd and vim.b.is_fresh_template then
+              last_ft = ext
+              save_last_ft(ext)
+            end
+          end
+        end
+      end,
+    })
 
     -- Keymaps
+    vim.keymap.set('n', '<leader>ct', toggle_template_folds, { desc = '[C]ompetitive [T]oggle template fold' })
+
+    -- Load template command
+    vim.api.nvim_create_user_command('CompetitestLoadTemplate', function()
+      local ft = vim.bo.filetype
+      local ext_key = ext_key_for_filetype(ft)
+      local path = template_file[ext_key]
+      if not path then
+        vim.notify('No template for filetype: ' .. ft, vim.log.levels.WARN)
+        return
+      end
+
+      local full = vim.fn.expand(path)
+      if vim.fn.filereadable(full) == 1 then
+        local lines = {}
+        for line in io.lines(full) do
+          table.insert(lines, line)
+        end
+        vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+        vim.b.is_fresh_template = true
+        auto_fold_template(true)
+        vim.notify('Template loaded for ' .. ft, vim.log.levels.INFO)
+      else
+        vim.notify('Template not found: ' .. full, vim.log.levels.ERROR)
+      end
+    end, { desc = 'Load competitive programming template' })
+
+    -- Competitive programming keymaps
     vim.keymap.set('n', '<leader>cr', '<cmd>CompetiTest run<CR>', { desc = '[C]ompetitive [R]un tests' })
     vim.keymap.set('n', '<leader>ca', '<cmd>CompetiTest add_testcase<CR>', { desc = '[C]ompetitive [A]dd test case' })
     vim.keymap.set('n', '<leader>ce', '<cmd>CompetiTest edit_testcase<CR>', { desc = '[C]ompetitive [E]dit test case' })
     vim.keymap.set('n', '<leader>cd', '<cmd>CompetiTest delete_testcase<CR>', { desc = '[C]ompetitive [D]elete test case' })
     vim.keymap.set('n', '<leader>cp', '<cmd>CompetiTest receive problem<CR>', { desc = '[C]ompetitive receive [P]roblem' })
     vim.keymap.set('n', '<leader>cc', '<cmd>CompetiTest receive contest<CR>', { desc = '[C]ompetitive receive [C]ontest' })
+    vim.keymap.set('n', '<leader>cl', '<cmd>CompetitestLoadTemplate<CR>', { desc = '[C]ompetitive [L]oad template' })
   end,
 }

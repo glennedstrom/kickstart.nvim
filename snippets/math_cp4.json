@@ -1,6 +1,6 @@
-
+{
   "Modular Arithmetic": {
-    "prefix": "modular",
+    "prefix": "euclid",
     "body": [
       "typedef long long ll;",
       "",
@@ -49,6 +49,7 @@
       "bitset<10000010> bs;",
       "vll p;",
       "",
+      "// TODO: call sieve in the main method",
       "void sieve(ll upperbound) {",
       "  _sieve_size = upperbound+1;",
       "  bs.set();",
