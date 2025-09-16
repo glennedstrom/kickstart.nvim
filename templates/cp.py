@@ -10,6 +10,7 @@ from itertools import combinations, combinations_with_replacement, count, groupb
 import heapq
 from heapq import nlargest, nsmallest
 from queue import Queue, PriorityQueue
+ints = lambda: map(int, input().split())
 
 def solve():
     pass
