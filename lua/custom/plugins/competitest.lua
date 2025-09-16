@@ -141,7 +141,7 @@ return {
     require('competitest').setup {
       local_config_file_name = '.competitest.lua',
       compile_command = {
-        cpp = { exec = 'g++', args = { '-Wall', '-g', '-O2', '-std=gnu++17', '$(FNAME)', '-o', '$(FNOEXT)' } },
+        cpp = { exec = 'g++', args = { '-Wall', '-g', '-O2', '-std=c++23', '$(FNAME)', '-o', '$(FNOEXT)' } },
         c = { exec = 'gcc', args = { '-Wall', '-O2', '$(FNAME)', '-o', '$(FNOEXT)' } },
       },
       run_command = {

@@ -219,21 +219,15 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 -- vim.keymap.set("n", "<C-S-j>", "<C-w>J", { desc = "Move window to the lower" })
 -- vim.keymap.set("n", "<C-S-k>", "<C-w>K", { desc = "Move window to the upper" })
 --
--- Indent-only formatting for C/C++
-vim.keymap.set('n', '<leader>=', 'gg=G<C-o>', { desc = 'Indent entire file' })
 
--- Auto-indent on save for C/C++ files only
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = { '*.c', '*.cpp', '*.cc', '*.cxx', '*.h', '*.hpp' },
   callback = function()
-    -- Save cursor position
-    local cursor_pos = vim.api.nvim_win_get_cursor(0)
-    -- Indent entire file
-    vim.cmd 'normal! gg=G'
-    -- Restore cursor position
-    vim.api.nvim_win_set_cursor(0, cursor_pos)
+    local view = vim.fn.winsaveview()
+    vim.cmd 'keepjumps keeppatterns silent! %normal! ='
+    vim.fn.winrestview(view)
   end,
-  desc = 'Auto-indent C/C++ files on save',
+  desc = 'Auto-indent C/C++ while keeping cursor and folds',
 })
 
 -- [[ Basic Autocommands ]]
