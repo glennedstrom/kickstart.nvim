@@ -141,7 +141,24 @@ return {
     require('competitest').setup {
       local_config_file_name = '.competitest.lua',
       compile_command = {
-        cpp = { exec = 'g++', args = { '-Wall', '-g', '-O2', '-std=c++23', '$(FNAME)', '-o', '$(FNOEXT)' } },
+        --cpp = { exec = 'g++', args = { '-Wall', '-g', '-O2', '-std=c++23', '$(FNAME)', '-o', '$(FNOEXT)' } },
+        cpp = {
+          exec = 'g++',
+          args = {
+            '-fsanitize=address,undefined,leak',
+            '-fno-omit-frame-pointer',
+            '-Wall',
+            '-Wno-unused-variable',
+            '-Wno-unused-but-set-variable',
+            '-Wno-sign-compare',
+            '-g',
+            '-O2',
+            '-std=c++23',
+            '$(FNAME)',
+            '-o',
+            '$(FNOEXT)',
+          },
+        },
         c = { exec = 'gcc', args = { '-Wall', '-O2', '$(FNAME)', '-o', '$(FNOEXT)' } },
       },
       run_command = {
@@ -149,10 +166,40 @@ return {
         c = { exec = './$(FNOEXT)' },
         python = { exec = 'python3', args = { '-u', '$(FNAME)' } },
       },
+      -- Enable split UI interface
+      runner_ui = {
+        interface = 'split',
+        mappings = {
+          run_again = 'R',
+          run_all_again = '<C-r>',
+          kill = 'K',
+          kill_all = '<C-k>',
+          view_input = { 'i', 'I' },
+          view_output = { 'a', 'A' },
+          view_stdout = { 'o', 'O' },
+          view_stderr = { 'e', 'E' },
+          toggle_diff = { 'd', 'D' },
+          close = { 'Q' }, -- Removed 'q' from here, only 'Q' remains
+        },
+      },
+      split_ui = {
+        position = 'right',
+        relative_to_editor = true,
+        total_width = 0.3,
+        vertical_layout = {
+          { 1, 'tc' },
+          { 1, { { 1, 'so' }, { 1, 'eo' } } },
+          { 1, { { 1, 'si' }, { 1, 'se' } } },
+        },
+      },
 
       template_file = template_file,
+      evaluate_template_modifiers = true,
       testcases_directory = './tests',
-      testcases_use_single_file = true,
+      testcases_auto_detect_storage = true,
+      testcases_use_single_file = false,
+      testcases_input_file_format = '$(FNOEXT)_input$(TCNUM).txt',
+      testcases_output_file_format = '$(FNOEXT)_output$(TCNUM).txt',
       split_direction = 'horizontal',
       popup_width = 95,
       popup_height = 80,
@@ -160,7 +207,6 @@ return {
       show_nu = true,
       show_rnu = true,
 
-      -- Use the saved last_ft as default
       received_problems_path = function(task, file_extension)
         local ext = last_ft or file_extension or 'cpp'
         local name = task.name:gsub('%s+', '_'):gsub('[^%w_-]', '')
@@ -171,6 +217,13 @@ return {
         local ext = last_ft or file_extension or 'cpp'
         local name = task.name:gsub('%s+', '_'):gsub('[^%w_-]', '')
         return string.format('%s.%s', name, ext)
+      end,
+
+      received_contests_directory = function(task)
+        local contest = task.group:match '-%s*(.+)' or 'NONE'
+        contest = contest:gsub('^Codeforces%s*', '')
+        contest = contest:gsub('%s+', '_'):gsub('[^%w_-]', '')
+        return string.format('%s/%s', vim.fn.getcwd(), contest)
       end,
     }
 
@@ -269,7 +322,13 @@ return {
     end, { desc = 'Load competitive programming template' })
 
     -- Competitive programming keymaps
-    vim.keymap.set('n', '<leader>cr', '<cmd>CompetiTest run<CR>', { desc = '[C]ompetitive [R]un tests' })
+    --vim.keymap.set('n', '<leader>cr', '<cmd>CompetiTest run<CR>', { desc = '[C]ompetitive [R]un tests' })
+    vim.keymap.set('n', '<leader>cr', function()
+      vim.cmd 'CompetiTest run'
+      vim.schedule(function()
+        vim.cmd 'wincmd W'
+      end)
+    end, { desc = '[C]ompetitive [R]un tests' })
     vim.keymap.set('n', '<leader>ca', '<cmd>CompetiTest add_testcase<CR>', { desc = '[C]ompetitive [A]dd test case' })
     vim.keymap.set('n', '<leader>ce', '<cmd>CompetiTest edit_testcase<CR>', { desc = '[C]ompetitive [E]dit test case' })
     vim.keymap.set('n', '<leader>cd', '<cmd>CompetiTest delete_testcase<CR>', { desc = '[C]ompetitive [D]elete test case' })

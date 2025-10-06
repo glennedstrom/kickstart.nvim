@@ -49,7 +49,7 @@
       "bitset<10000010> bs;",
       "vll p;",
       "",
-      "// TODO: call sieve in the main method",
+      "// TODO: call sieve in the main method sieve(bs.size()-1);",
       "void sieve(ll upperbound) {",
       "  _sieve_size = upperbound+1;",
       "  bs.set();",
