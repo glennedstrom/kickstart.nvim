@@ -11,12 +11,8 @@ typedef long long ll;
 * Limits:  $(TIMELIM)ms, $(MEMLIM)MB
 */
 
-void precalc(){
-    // optional
-}
-
 void solve() {
     // TODO:
 }
 
-int main(){ios_base::sync_with_stdio(false);cin.tie(NULL);int t;cin>>t;precalc();while(t--){solve();}}//{ios_base::sync_with_stdio(false);cin.tie(NULL);precalc();solve();}
+int main(){ios_base::sync_with_stdio(false);cin.tie(NULL);int t;cin>>t;while(t--){solve();}}//{ios_base::sync_with_stdio(false);cin.tie(NULL);solve();}

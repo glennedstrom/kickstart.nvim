@@ -5,11 +5,13 @@ return {
     local template_file = {
       cpp = '~/.config/nvim/templates/cp.cpp',
       py = '~/.config/nvim/templates/cp.py',
+      rs = '~/.config/nvim/templates/cp.rs',
     }
 
     local fold_patterns = {
       cpp = { '^#include', '^#define', '^using' },
       python = { '^import ', '^from ', '^#.*template', '^#.*Template' },
+      rust = { '^use ', '^#%[', '^mod ' },
     }
 
     local last_ft_file = vim.fn.stdpath 'data' .. '/last_problem_ft'
@@ -40,6 +42,9 @@ return {
     local function ext_key_for_filetype(ft)
       if ft == 'python' then
         return 'py'
+      end
+      if ft == 'rust' then
+        return 'rs'
       end
       return ft
     end
@@ -92,6 +97,12 @@ return {
       elseif ft == 'python' then
         for i, line in ipairs(lines) do
           if line:match '^import%s' or line:match '^from%s+[%w_.]+%s+import' then
+            last_line = i
+          end
+        end
+      elseif ft == 'rust' then
+        for i, line in ipairs(lines) do
+          if line:match '^use%s' or line:match '^#%[' or line:match '^mod%s' then
             last_line = i
           end
         end
@@ -160,11 +171,13 @@ return {
           },
         },
         c = { exec = 'gcc', args = { '-Wall', '-O2', '$(FNAME)', '-o', '$(FNOEXT)' } },
+        rust = { exec = 'rustc', args = { '-g', '--edition', '2024', '$(FNAME)', '-o', '$(FNOEXT)' } },
       },
       run_command = {
         cpp = { exec = './$(FNOEXT)' },
         c = { exec = './$(FNOEXT)' },
         python = { exec = 'python3', args = { '-u', '$(FNAME)' } },
+        rust = { exec = './$(FNOEXT)' },
       },
       -- Enable split UI interface
       runner_ui = {
@@ -232,7 +245,7 @@ return {
 
     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
       group = augroup,
-      pattern = { '*.cpp', '*.py', '*.c' },
+      pattern = { '*.cpp', '*.py', '*.c', '*.rs' },
       callback = function()
         vim.defer_fn(function()
           vim.b.is_fresh_template = is_fresh_template()
@@ -242,7 +255,7 @@ return {
           local current_file = vim.fn.expand '%:p'
           if current_file and current_file ~= '' then
             local ext = current_file:match '%.([^%.]+)$'
-            if ext and (ext == 'cpp' or ext == 'py' or ext == 'c') then
+            if ext and (ext == 'cpp' or ext == 'py' or ext == 'c' or ext == 'rs') then
               local cwd = vim.fn.getcwd()
               -- Only update if file is in current working directory (likely a competition file)
               if current_file:sub(1, #cwd) == cwd then
@@ -258,7 +271,7 @@ return {
     -- Track when new competitive programming files are created
     vim.api.nvim_create_autocmd({ 'BufNewFile' }, {
       group = augroup,
-      pattern = { '*.cpp', '*.py', '*.c' },
+      pattern = { '*.cpp', '*.py', '*.c', '*.rs' },
       callback = function()
         local current_file = vim.fn.expand '%:p'
         if current_file and current_file ~= '' then
@@ -277,7 +290,7 @@ return {
     -- Track when competitive programming files are saved
     vim.api.nvim_create_autocmd({ 'BufWritePost' }, {
       group = augroup,
-      pattern = { '*.cpp', '*.py', '*.c' },
+      pattern = { '*.cpp', '*.py', '*.c', '*.rs' },
       callback = function()
         local current_file = vim.fn.expand '%:p'
         if current_file and current_file ~= '' then
