@@ -1,0 +1,52 @@
+{
+  "Custom Pair Hash": {
+    "prefix": "hashpair",
+    "body": [
+      "template <typename T>",
+      "inline void hash_combine(std::size_t& seed, const T& val) {",
+      "    seed ^= std::hash<T>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);",
+      "}",
+      "",
+      "struct pair_hash {",
+      "    template <typename T1, typename T2>",
+      "    std::size_t operator()(const std::pair<T1, T2>& p) const {",
+      "        std::size_t seed = 0;",
+      "        hash_combine(seed, p.first);",
+      "        hash_combine(seed, p.second);",
+      "        return seed;",
+      "    }",
+      "};"
+    ],
+    "description": "Custom hash function for std::pair",
+    "scope": "cpp"
+  },
+  "Custom Tuple Hash": {
+    "prefix": "hashtuple",
+    "body": [
+      "template <typename T>",
+      "inline void hash_combine(std::size_t& seed, const T& val) {",
+      "    seed ^= std::hash<T>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);",
+      "}",
+      "",
+      "struct tuple_hash {",
+      "    template <typename... Args>",
+      "    std::size_t operator()(const std::tuple<Args...>& t) const {",
+      "        return apply(t);",
+      "    }",
+      "private:",
+      "    template <typename Tuple, std::size_t... I>",
+      "    std::size_t hash_impl(const Tuple& t, std::index_sequence<I...>) const {",
+      "        std::size_t seed = 0;",
+      "        (..., hash_combine(seed, std::get<I>(t)));  // C++17 fold expression",
+      "        return seed;",
+      "    }",
+      "    template <typename... Args>",
+      "    std::size_t apply(const std::tuple<Args...>& t) const {",
+      "        return hash_impl(t, std::index_sequence_for<Args...>{});",
+      "    }",
+      "};"
+    ],
+    "description": "Custom hash function for std::tuple",
+    "scope": "cpp"
+  }
+}
