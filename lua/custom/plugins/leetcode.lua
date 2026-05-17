@@ -4,7 +4,7 @@ vim.pack.add {
 }
 
 require('leetcode').setup {
-  lang = 'pick my own',
+  lang = 'cpp',
   picker = {
     provider = 'telescope',
   },
@@ -24,3 +24,4 @@ require('leetcode').setup {
 }
 
 vim.keymap.set('n', '<leader>cq', '<cmd>Leet<CR>', { desc = '[C]ompetitive LeetCode Dashboard' })
+vim.keymap.set('n', '<leader>cL', '<cmd>Leet lang<CR>', { desc = '[C]ompetitive Select [L]anguage' })

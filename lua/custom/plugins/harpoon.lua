@@ -1,13 +1,13 @@
-vim.pack.add { 'https://github.com/ThePrimeagen/harpoon' }
+vim.pack.add {
+  {
+    src = 'https://github.com/ThePrimeagen/harpoon',
+    version = 'harpoon2',
+  },
+}
 
 local harpoon = require 'harpoon'
 
-harpoon:setup {
-  settings = {
-    save_on_toggle = true,
-    sync_on_ui_close = true,
-  },
-}
+harpoon:setup()
 
 vim.keymap.set('n', '<leader>ha', function()
   harpoon:list():add()
