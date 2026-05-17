@@ -1,3 +1,4 @@
+-- Legacy lazy.nvim plugin spec archived during vim.pack migration. This file no longer works as-is.
 return {
     'nvim-neotest/neotest',
     dependencies = {
